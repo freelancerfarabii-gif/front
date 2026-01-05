@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode"; // ✅ named import
+import jwtDecode from "jwt-decode"; // ✅ fixed default import
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = "https://back-vsrx.onrender.com"; // ✅ public backend URL
 
 const inputStyle = {
   width: "100%",
@@ -39,7 +39,13 @@ export default function Profile() {
       })
       .then((res) => {
         setUser({ username: res.data.username, email: res.data.email });
-        if (res.data.profilePic) setPreview(`${API_BASE}${res.data.profilePic}`);
+        if (res.data.profilePic) {
+          // preview URL fix
+          const url = res.data.profilePic.startsWith("http")
+            ? res.data.profilePic
+            : `${API_BASE}${res.data.profilePic}`;
+          setPreview(url);
+        }
       })
       .catch(() => navigate("/login"));
   }, [navigate]);
@@ -71,7 +77,12 @@ export default function Profile() {
 
       alert(res.data.msg);
 
-      if (res.data.user?.profilePic) setPreview(`${API_BASE}${res.data.user.profilePic}`);
+      if (res.data.user?.profilePic) {
+        const url = res.data.user.profilePic.startsWith("http")
+          ? res.data.user.profilePic
+          : `${API_BASE}${res.data.user.profilePic}`;
+        setPreview(url);
+      }
       setPassword("");
       setProfilePic(null);
     } catch (err) {
@@ -119,7 +130,7 @@ export default function Profile() {
           style={{
             width: 120,
             height: 120,
-            borderRadius: "50%", // Fixed: completed "50%"
+            borderRadius: "50%",
             background: "#ccc",
             display: "inline-block",
             marginBottom: 12,
@@ -128,7 +139,6 @@ export default function Profile() {
       )}
 
       <input type="file" onChange={handleFileChange} style={{ marginBottom: 12 }} />
-
       <input
         style={inputStyle}
         value={user.username}
